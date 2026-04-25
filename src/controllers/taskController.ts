@@ -12,8 +12,11 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
     if (status === "incomplete") query.completed = false
 
     if (search) {
-      query.title = { $regex: search, $options: "i" }
-    }
+  query.$or = [
+    { title: { $regex: search, $options: "i" } },
+    { description: { $regex: search, $options: "i" } }
+  ]
+}
 
     const pageNumber = parseInt(page as string)
     const limitNumber = parseInt(limit as string)
@@ -43,10 +46,11 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
 
 export const createTask = async (req: AuthRequest, res: Response) => {
   try {
-    const { title } = req.body
+    const { title, description } = req.body
 
     const task = await Task.create({
       title,
+      description,
       user: req.userId
     })
 
@@ -59,7 +63,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 
 export const updateTask = async (req: AuthRequest, res: Response) => {
   try {
-    const { title, completed } = req.body
+    const { title, description, completed } = req.body
 
     const task = await Task.findById(req.params.id)
 
@@ -67,13 +71,9 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: "Task not found" })
     }
 
-    if (title !== undefined) {
-      task.title = title
-    }
-
-    if (completed !== undefined) {
-      task.completed = completed
-    }
+    if (title !== undefined) task.title = title
+    if (description !== undefined) task.description = description
+    if (completed !== undefined) task.completed = completed
 
     await task.save()
 
