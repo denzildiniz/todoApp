@@ -13,6 +13,18 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+app.get("/api", (req, res) => {
+  res.json({
+    name: "Todo API",
+    version: "1.0",
+    endpoints: [
+      "/api/auth/register",
+      "/api/auth/login",
+      "/api/tasks"
+    ]
+  })
+})
+
 app.use("/api/auth", authRoutes)
 app.use("/api/tasks", taskRoutes)
 
